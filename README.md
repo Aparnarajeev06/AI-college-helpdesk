@@ -1,178 +1,409 @@
 # NCERC College Helpdesk
 
-A Django-powered campus helpdesk application featuring real AI-powered conversational assistance with verified campus facts, facility images, location details, interactive answer rating/feedback, and links to the official NCERC 360° virtual tour and Google Maps.
+A Django-powered campus helpdesk application designed to help students, visitors, and staff find information about Nehru College of Engineering and Research Centre (NCERC).
 
----
+The application provides a conversational chatbot, verified campus information, facility images, location details, interactive feedback, and links to the official NCERC 360° virtual tour and Google Maps.
 
-## 1. AI Integration Overview
+## Features
 
-The chatbot features a genuine language model integration combined with Retrieval-Augmented Generation (RAG) and an automatic rule-based fallback:
+- **Conversational Chatbot:** Allows users to ask questions about campus facilities, departments, locations, and services using natural language.
+- **AI Integration:** Supports configurable AI providers, including a local Ollama model and the OpenAI API, when properly configured.
+- **Verified Campus Information:** Retrieves campus information from a structured local dataset.
+- **Rule-Based Fallback:** Provides predefined helpdesk responses when AI is disabled or unavailable.
+- **Facility Information:** Displays information about facilities such as the library, canteen, gym, hostel, transportation, auditorium, and seminar hall.
+- **Campus Navigation:** Helps users explore available campus locations and access relevant navigation resources.
+- **Interactive Feedback:** Allows users to submit feedback about chatbot responses.
+- **Responsive Interface:** Uses HTML, CSS, and JavaScript to provide an interactive user interface.
+- **Request Validation:** Includes input validation and request rate limiting.
+- **Security Measures:** Uses Django's built-in security features and safe frontend rendering practices.
 
-- **Lightweight Retrieval (RAG)**: The backend indexes verified campus facts from `helpdesk/data/ncerc_data.py`. When a question is submitted, only the most relevant verified records are retrieved and passed to the model as reference data.
-- **Natural-Language Understanding**: The model interprets diverse conversational phrasings, department inquiries, classroom locations, timings, and exploration queries.
-- **Campus Safety & Grounding**: The system prompt strictly constrains the model to rely only on the retrieved facts. It will not hallucinate room numbers, unverified routes, or missing facilities (e.g., ATMs).
-- **Ambiguity Clarification**: When an ambiguous place query is entered (e.g., "Where is the office?"), the system asks a clarifying question listing matching facilities.
-- **Modular Provider Architecture**: Easily switch between a local offline model and a cloud provider API by changing settings in `.env`.
-- **Automatic Rule-Based Fallback**: If the local model is offline, the API key is missing or invalid, rate limits occur, or the AI service times out, the system automatically falls back to the built-in rule-based chatbot so users always get verified answers without application crashes.
+## Technology Stack
 
----
+| Component | Technology |
+|---|---|
+| Backend | Python, Django |
+| Frontend | HTML, CSS, JavaScript |
+| Database | SQLite |
+| AI Integration | Ollama and optional OpenAI API |
+| Data Source | Structured Python campus dataset |
+| Development Environment | Visual Studio Code |
+| Version Control | Git and GitHub |
 
-## 2. Supported AI Providers & Requirements
+## Project Structure
 
-You can run the chatbot in one of two modes:
-
-### Option A: Local AI Model (`CHAT_AI_PROVIDER=ollama`)
-- **Model**: Qwen 2.5 3B Instruct (`qwen2.5:3b`) running via [Ollama](https://ollama.com/).
-- **Cost**: **No per-message API charges.** Uses open-weight models.
-- **Hardware & Resource Requirements**: Runs directly on your computer. Requires approximately 2–3 GB of disk space for the model weights, at least 8 GB of system RAM, and moderate CPU or GPU processing power.
-- **Setup**: Requires downloading and running Ollama on Windows.
-
-### Option B: Cloud AI API (`CHAT_AI_PROVIDER=openai`)
-- **Model**: OpenAI `gpt-4o-mini` (or configurable model).
-- **Cost & Terms**: **Requires an OpenAI account and API key (`OPENAI_API_KEY`).** Usage is billed according to OpenAI's pay-per-token API terms. (Never assume cloud APIs are free; check your OpenAI account tier and billing credits).
-- **Hardware & Resource Requirements**: Negligible local computer resources (runs on OpenAI's remote cloud servers). Requires an active internet connection.
-
----
-
-## 3. Windows PowerShell Setup Guide
-
-### Prerequisites
-- Python 3.10+ installed on Windows.
-- VS Code or your preferred editor.
-
-### Step 1: Open Terminal in Project Folder
-Open PowerShell in the workspace root:
-```powershell
-cd C:\Users\aparn\AI-College-Helpdesk
+```text
+AI-College-Helpdesk/
+│
+├── college_helpdesk/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── helpdesk/
+│   ├── data/
+│   │   └── ncerc_data.py
+│   ├── management/
+│   │   └── commands/
+│   ├── migrations/
+│   ├── static/
+│   │   └── helpdesk/
+│   │       ├── images/
+│   │       ├── script.js
+│   │       ├── style.css
+│   │       └── ngi campus.webp
+│   ├── templates/
+│   │   └── helpdesk/
+│   │       └── home.html
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── tests.py
+│   ├── views.py
+│   └── ai.py
+│
+├── scratch/
+├── .env.example
+├── .gitignore
+├── manage.py
+├── requirements.txt
+└── README.md
 ```
 
-### Step 2: Virtual Environment & Dependencies
-Activate the virtual environment and verify installed dependencies:
+*Note: The exact files and folders may vary depending on the current version of the project.*
+
+## AI Integration Overview
+
+The chatbot can use an AI provider or operate in rule-based mode.
+
+### 1. Local AI Using Ollama
+
+Ollama allows supported language models to run on your own computer.
+
+The project can be configured to use the Qwen 2.5 3B Instruct model:
+
+- Model identifier: `qwen2.5:3b`
+- Runs locally after the model has been downloaded.
+- Does not require a paid API for model inference.
+- Requires sufficient system memory, storage, and processing power.
+
+### 2. Cloud AI Using OpenAI
+
+The project can also be configured to use the OpenAI API.
+
+- Model: Configurable through environment variables.
+- Requires an OpenAI API key and an account with available API access and billing.
+- Requires an internet connection.
+- API usage may incur charges.
+
+### 3. Rule-Based Fallback
+
+When AI is disabled or unavailable, the application can use its built-in rule-based responses.
+
+The fallback helps users continue accessing supported campus information without depending entirely on an external AI service.
+
+**Important:** AI availability and behavior depend on the configured provider, installed dependencies, environment variables, and current application implementation.
+
+## How the System Works
+
+1. The user opens the helpdesk website.
+2. The user enters a question in the chat interface.
+3. The backend validates the incoming request.
+4. Relevant information is retrieved from the campus dataset.
+5. If AI is enabled and available, the configured model generates a response using the retrieved information.
+6. If AI cannot provide a response, the application can use its rule-based fallback.
+7. The answer is displayed in the chat interface.
+8. The user can submit feedback where supported.
+
+### Example Questions
+
+Users may ask questions such as:
+
+- Where is the central library?
+- What are the canteen timings?
+- Where is the gym located?
+- What facilities are available on campus?
+- How can I explore the campus virtually?
+- Where is a particular classroom?
+- What transportation facilities are available?
+
+The accuracy of answers depends on the information available in the project's campus dataset.
+
+## Requirements
+
+Before running the project, ensure you have:
+
+- Python installed.
+- pip available.
+- Git installed if you want to clone the repository.
+- Visual Studio Code or another Python-compatible editor.
+- A web browser.
+
+For AI functionality, additional requirements depend on the selected provider.
+
+## Installation and Setup
+
+### Step 1: Clone the Repository
+
+Open PowerShell and navigate to the folder where you want to store the project.
+
+Run:
+
+```powershell
+git clone https://github.com/Aparnarajeev06/AI-college-helpdesk.git
+```
+
+Navigate into the project folder:
+
+```powershell
+cd AI-college-helpdesk
+```
+
+### Step 2: Create a Virtual Environment
+
+Create a Python virtual environment:
+
+```powershell
+python -m venv venv
+```
+
+Activate it:
+
 ```powershell
 .\venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks activation, you can use the virtual environment's Python executable directly.
+
+### Step 3: Install Dependencies
+
+Install the packages listed in `requirements.txt`:
+
+```powershell
 python -m pip install -r requirements.txt
 ```
-*(If PowerShell execution policies block script activation, you can run commands directly using `.\venv\Scripts\python.exe`)*.
 
-### Step 3: Configure Environment Variables (`.env`)
-Create your `.env` file from `.env.example` if you do not already have one:
+### Step 4: Configure Environment Variables
+
+Create a local `.env` file from `.env.example` if one does not already exist:
+
 ```powershell
-if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+if (-not (Test-Path .env)) {
+    Copy-Item .env.example .env
+}
 ```
 
-Open `.env` in VS Code. It will look like this:
+Open `.env` in VS Code and review the configuration.
+
+Example configuration:
+
 ```env
-# Django Secret Key
-DJANGO_SECRET_KEY=replace-with-a-long-random-secret
+DJANGO_SECRET_KEY=replace-with-a-secure-random-secret
 
-# Master switch: set to false to use only local rule-based chatbot
 CHAT_AI_ENABLED=true
-
-# Provider selection: "ollama" (local computer model) or "openai" (cloud AI API)
 CHAT_AI_PROVIDER=ollama
 
-# Local Ollama settings (used when CHAT_AI_PROVIDER=ollama)
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=qwen2.5:3b
 OLLAMA_TIMEOUT=90
 
-# Cloud OpenAI settings (used when CHAT_AI_PROVIDER=openai)
 OPENAI_API_KEY=your_openai_api_key_here
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_TIMEOUT=30
 
-# Chat rate limit (requests per client IP per minute)
 CHAT_RATE_LIMIT=12
 ```
 
-> **Security Note:** Never commit your `.env` file or paste API keys into public chats. `.env` is excluded in `.gitignore`.
+**Important:** Use only environment variable names supported by the project's settings and AI implementation. The values above are examples and may need adjustment to match your current code.
 
-To generate a private `DJANGO_SECRET_KEY` on Windows:
+Never commit your actual `.env` file, passwords, API keys, or production secrets to GitHub.
+
+### Step 5: Generate a Django Secret Key
+
+You can generate a new secret key with:
+
 ```powershell
-.\venv\Scripts\python.exe -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
----
+Copy the generated value into your local `.env` file if your settings are configured to read `DJANGO_SECRET_KEY` from that file.
 
-## 4. Starting the AI Model
+Do not publish the generated secret key.
 
-### If using Option A: Local Model (Ollama)
-1. Install [Ollama for Windows](https://ollama.com/download).
-2. Pull the model once in PowerShell:
-   ```powershell
-   ollama pull qwen2.5:3b
-   ```
-3. Ensure the Ollama service is running:
-   ```powershell
-   ollama serve
-   ```
-4. Set in your `.env`:
-   ```env
-   CHAT_AI_PROVIDER=ollama
-   ```
+### Step 6: Start the Local AI Model (Optional)
 
-### If using Option B: Cloud API (OpenAI)
-1. In your `.env` file, set:
-   ```env
-   CHAT_AI_PROVIDER=openai
-   OPENAI_API_KEY=your_actual_openai_api_key
-   OPENAI_MODEL=gpt-4o-mini
-   ```
-2. No local model server is required; chat requests connect securely over HTTPS to the OpenAI API endpoint.
+If you choose Ollama, install it from the official website:
 
----
+https://ollama.com/
 
-## 5. Starting the Django Server
+Download the configured model:
 
-In your project terminal:
 ```powershell
-.\venv\Scripts\python.exe manage.py check
-.\venv\Scripts\python.exe manage.py migrate
-.\venv\Scripts\python.exe manage.py runserver
+ollama pull qwen2.5:3b
 ```
 
-Open your browser to:
-[http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+Ensure Ollama is running and the model is available.
 
----
+You can check the installed models with:
 
-## 6. How the System Works
-
-1. **Question Input**: The user asks a question via the chat widget (e.g., *"Where is the library?"*, *"How can I find the gym?"*, *"Where is room 111?"*, *"What are the canteen timings?"*, or *"How can I explore the campus?"*).
-2. **Input Validation**: The backend validates length (up to 1,000 characters) and enforces rate limiting (default 12 requests per IP per minute).
-3. **Retrieval**: Relevant entries from `helpdesk/data/ncerc_data.py` are scored and retrieved.
-4. **AI Generation**:
-   - The selected model (`ollama` or `openai`) is called with strict grounding prompts.
-   - If the model is active, the response is labeled `AI-generated answer · local model` or `AI-generated answer · OpenAI`.
-5. **Fallback Protection**:
-   - If the AI model is disabled, offline, or returns an error, the response cleanly falls back to the local rule-based system without breaking the UI.
-   - Responses are rendered securely using safe text elements to prevent XSS.
-
----
-
-## 7. Running Tests
-
-To verify backend endpoints, mock AI calls, CSRF protection, input limits, and retrieval:
 ```powershell
-.\venv\Scripts\python.exe manage.py test helpdesk.tests
+ollama list
 ```
 
-To verify frontend script syntax:
+Set the provider in `.env` to the value supported by your application:
+
+```env
+CHAT_AI_PROVIDER=ollama
+```
+
+If you choose the OpenAI API instead, configure a valid API key and the supported provider settings.
+
+### Step 7: Run Database Migrations
+
+Run:
+
+```powershell
+python manage.py migrate
+```
+
+### Step 8: Check the Django Project
+
+Run:
+
+```powershell
+python manage.py check
+```
+
+### Step 9: Start the Development Server
+
+Run:
+
+```powershell
+python manage.py runserver
+```
+
+Open the following address in your browser:
+
+http://127.0.0.1:8000/
+
+The application should now be accessible locally.
+
+## Testing
+
+Run the Django application tests:
+
+```powershell
+python manage.py test helpdesk.tests
+```
+
+If Node.js is installed, you can check the JavaScript syntax:
+
 ```powershell
 node --check helpdesk/static/helpdesk/script.js
 ```
 
-All AI tests use mocked responses so running tests never incurs API costs or requires an active local model server.
+Test coverage depends on the tests implemented in the project.
+
+## Security Considerations
+
+- Keep `.env` out of version control.
+- Never publish real API keys or Django secret keys.
+- Do not commit private user information or sensitive database contents.
+- Exclude `venv/`, `.venv/`, `__pycache__/`, and compiled Python files using `.gitignore`.
+- Use Django's built-in protections and validate incoming user input.
+- Use a production-ready deployment configuration before making the application publicly accessible.
+- Review all committed files before pushing them to a public repository.
+
+## Troubleshooting
+
+### 1. Django Is Not Installed
+
+Activate the virtual environment and run:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+### 2. Virtual Environment Activation Fails
+
+Use the virtual environment's Python executable directly:
+
+```powershell
+.\venv\Scripts\python.exe manage.py runserver
+```
+
+### 3. AI Responses Are Unavailable
+
+For Ollama:
+
+```powershell
+ollama list
+```
+
+Check that the configured model exists and that the Ollama service is running.
+
+For OpenAI, check the API key, account access, billing, and provider configuration.
+
+If AI is unavailable, verify that the application's rule-based fallback is enabled and functioning as intended.
+
+### 4. Port 8000 Is Already in Use
+
+Run Django on another port:
+
+```powershell
+python manage.py runserver 8080
+```
+
+Open:
+
+http://127.0.0.1:8080/
+
+### 5. Static Files Are Not Displayed
+
+Check the static file paths in the templates and confirm that the corresponding files exist under the application's static directory.
+
+### 6. Database or Migration Errors
+
+Run:
+
+```powershell
+python manage.py check
+python manage.py migrate
+```
+
+If the error continues, inspect the terminal output to identify the affected migration or database operation.
+
+## Future Enhancements
+
+Possible future improvements include:
+
+- Expanding the verified campus information dataset.
+- Improving campus search and navigation.
+- Adding multilingual responses.
+- Enhancing accessibility and mobile responsiveness.
+- Improving chatbot testing and response evaluation.
+- Adding more detailed feedback analysis.
+- Deploying the application to a production hosting environment.
+
+These are potential enhancements and may not be implemented in the current version.
+
+## Project Information
+
+**Project Name:** NCERC College Helpdesk
+
+**Institution:** Nehru College of Engineering and Research Centre (NCERC)
+
+**Category:** Web Application / Campus Information System
+
+**Backend:** Python and Django
+
+**Frontend:** HTML, CSS, and JavaScript
+
+**Database:** SQLite
+
+**Repository:** https://github.com/Aparnarajeev06/AI-college-helpdesk
 
 ---
 
-## 8. Troubleshooting
-
-- **Bot says "The AI assistant is unavailable, so I used the local helpdesk rules":**
-  - **For Ollama**: Verify Ollama is running (`ollama list`) and accessible at `http://127.0.0.1:11434`.
-  - **For OpenAI**: Check that `OPENAI_API_KEY` in `.env` is valid and your account has active billing/credits.
-- **Need to force rule-based mode:**
-  - Set `CHAT_AI_ENABLED=false` in `.env` and restart Django.
-- **Port 8000 already in use:**
-  - Start Django on an alternate port: `python manage.py runserver 8080`.
+*This project is intended to make campus information easier to access through a conversational helpdesk interface. Verify important campus information with official college sources when necessary.*
