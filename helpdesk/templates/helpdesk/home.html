@@ -1,0 +1,477 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCERC Campus Assistant</title>
+
+    <link rel="stylesheet" href="{% static 'helpdesk/style.css' %}">
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        #departments, #facilities, #contact {
+            scroll-margin-top: 100px;
+        }
+
+        #departments {
+            min-height: 500px;
+        }
+
+        /* Modern chat layout */
+        .chat-panel {
+            width: 100%;
+            max-width: 850px;
+            margin: 30px auto;
+            border: 1px solid #dce3ef;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 12px 35px rgba(20, 40, 80, 0.10);
+            color: #172033;
+        }
+
+        .chat-header {
+            padding: 20px;
+            color: white;
+            background: linear-gradient(135deg, #173b83, #4268db);
+        }
+
+        .chat-header h2 {
+            margin: 0 0 6px;
+        }
+
+        .chat-header p {
+            margin: 0;
+            opacity: .9;
+        }
+
+        .chat-status {
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .chat-status::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 7px;
+            border-radius: 50%;
+            background: #78f0a6;
+        }
+
+        .suggested-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 14px 18px 0;
+        }
+
+        .suggestion {
+            padding: 8px 12px;
+            border: 1px solid #ccd8f3;
+            border-radius: 20px;
+            background: #f4f7ff;
+            color: #24478d;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .suggestion:hover {
+            background: #e4ebff;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-height: 250px;
+            max-height: 430px;
+            overflow-y: auto;
+            padding: 22px 18px;
+            background: #f7f9fd;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 15px;
+            border-radius: 15px;
+            line-height: 1.55;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            border: 1px solid #e0e6f1;
+            border-bottom-left-radius: 4px;
+            background: white;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            background: #315bc4;
+            color: white;
+        }
+
+        .message-label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            opacity: .75;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 0 20px 12px;
+            color: #64748b;
+            font-size: 13px;
+            background: #f7f9fd;
+        }
+
+        .typing-indicator.visible {
+            display: block;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            min-width: 0;
+            padding: 13px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .chat-input-area input:focus {
+            border-color: #4268db;
+            box-shadow: 0 0 0 3px rgba(66, 104, 219, .12);
+        }
+
+        .chat-input-area button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 12px;
+            background: #315bc4;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .chat-input-area button:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .chat-footer {
+            padding: 10px 16px;
+            color: #64748b;
+            background: white;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .chat-panel {
+                margin: 20px auto;
+                border-radius: 13px;
+            }
+
+            .message {
+                max-width: 92%;
+            }
+
+            .chat-input-area {
+                padding: 10px;
+            }
+
+            .chat-input-area button {
+                padding: 10px 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <div class="logo">NCERC Campus Assistant</div>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="#departments">Departments</a>
+            <a href="#facilities">Facilities</a>
+            <a href="#campus-tour">Campus Tour</a>
+            <a href="#project-abstract">Abstract</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+        <h1>Welcome to NCERC</h1>
+
+        <p>Your campus information and navigation assistant.</p>
+        <p>
+            Ask about departments, classrooms, laboratories, facilities,
+            available timings, services, or campus directions.
+        </p>
+
+        <!-- MODERN CHAT INTERFACE -->
+        <section class="chat-panel" aria-label="Campus assistant chat">
+            <div class="chat-header">
+                <h2>How can I help you?</h2>
+                <p>Ask your NCERC campus questions in everyday language.</p>
+                <div class="chat-status">
+                    {% if chat_ai_enabled %}
+                        {{ chat_ai_provider|title }} AI with local fallback
+                    {% else %}
+                        Local rule-based assistant
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="suggested-questions" aria-label="Quick questions">
+                <button type="button" class="suggestion"
+                    data-question="Where is the library?">
+                    📚 Library
+                </button>
+
+                <button type="button" class="suggestion"
+                    data-question="What are the canteen timings?">
+                    🍽️ Canteen
+                </button>
+
+                <button type="button" class="suggestion"
+                    data-question="Where is the gym?">
+                    💪 Gym
+                </button>
+
+                <button type="button" class="suggestion"
+                    data-question="How do I get information about transport?">
+                    🚌 Transport
+                </button>
+
+                <button type="button" class="suggestion"
+                    data-question="Tell me about hostels.">
+                    🛏️ Hostels
+                </button>
+
+                <button type="button" class="suggestion"
+                    data-question="List all departments.">
+                    🏫 Departments
+                </button>
+
+                <button type="button" class="suggestion"
+                    data-question="Show me the campus tour.">
+                    🗺️ Campus Tour
+                </button>
+            </div>
+
+            <div
+                id="chat-messages"
+                class="chat-messages"
+                role="log"
+                aria-live="polite"
+                aria-relevant="additions"
+            >
+                <div class="message bot-message">
+                    <span class="message-label">Campus Assistant</span>
+                    Hello! 👋 I can help you find college facilities,
+                    rooms, departments, and campus information.
+                    What would you like to know?
+                </div>
+            </div>
+
+            <div id="typing-indicator" class="typing-indicator"
+                aria-live="polite">
+                AI is thinking...
+            </div>
+
+            <form id="chat-form" class="chat-input-area">
+                <input
+                    type="text"
+                    id="question"
+                    name="question"
+                    placeholder="Ask about library, room 318, transport..."
+                    aria-label="Enter your college question"
+                    autocomplete="off"
+                    maxlength="1000"
+                    required
+                >
+
+                <button type="submit" id="ask-button">
+                    Send ➤
+                </button>
+            </form>
+
+            <div class="chat-footer">
+                Please confirm important details with college staff.
+                Your question and rating are saved to improve the helpdesk;
+                do not include sensitive information.
+            </div>
+        </section>
+    </main>
+
+    <!-- DEPARTMENTS SECTION -->
+    <section id="departments" class="departments-section">
+        <h2>Departments</h2>
+
+        <div class="department-grid">
+            <div class="department-card">
+                <h3>Computer Science and Engineering</h3>
+                <p>B.Tech CSE</p>
+                <p>M.Tech CSE</p>
+            </div>
+
+            <div class="department-card">
+                <h3>Computer Science – AI &amp; ML</h3>
+                <p>B.Tech CSE (Artificial Intelligence &amp; Machine Learning)</p>
+            </div>
+
+            <div class="department-card">
+                <h3>Electronics and Communication Engineering</h3>
+                <p>B.Tech ECE</p>
+                <p>M.Tech VLSI Design</p>
+            </div>
+
+            <div class="department-card">
+                <h3>Electrical and Electronics Engineering</h3>
+                <p>B.Tech Electrical &amp; Computer Engineering</p>
+                <p>M.Tech Energy Systems</p>
+            </div>
+
+            <div class="department-card">
+                <h3>Mechanical Engineering</h3>
+                <p>B.Tech Mechanical Engineering (Industry Integrated)</p>
+            </div>
+
+            <div class="department-card">
+                <h3>Mechatronics Engineering (MTR)</h3>
+                <p>B.Tech Mechatronics Engineering</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CAMPUS FACILITIES SECTION -->
+    <section id="facilities" class="departments-section">
+        <h2>Campus Facilities</h2>
+
+        <div class="department-grid">
+            <div class="department-card">
+                <h3>📚 Central Library</h3>
+                <p><strong>Location:</strong> Ground Floor, Brahmagupta Block</p>
+                <p>Books, journals, periodicals and digital information services.</p>
+            </div>
+
+            <div class="department-card">
+                <h3>🍽️ Canteen</h3>
+                <p><strong>Location:</strong> Campus</p>
+                <p><strong>Timings:</strong> 8:00 AM – 5:00 PM on working days, including Saturday.</p>
+                <p>Food and refreshments for students and staff.</p>
+            </div>
+
+            <div class="department-card">
+                <h3>💪 Fitness Centre</h3>
+                <p><strong>Location:</strong> Bhaskara Building basement</p>
+                <p>Gymnasium and fitness equipment for students and staff.</p>
+            </div>
+
+            <div class="department-card">
+                <h3>🚌 College Transportation</h3>
+                <p><strong>Service:</strong> College bus services</p>
+                <p>Transportation for students and staff through college buses.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="project-abstract" class="departments-section">
+        <h2>Project Abstract</h2>
+        <p>
+            The NCERC College Helpdesk is a Django web application that helps
+            students and visitors find college information through a
+            conversational interface. It uses a locally hosted Qwen language
+            model with a lightweight retrieval layer to find relevant,
+            verified campus facts. If the model is not available, the existing
+            local rule-based chatbot remains as a fallback.
+        </p>
+        <p>
+            The available information covers departments, facilities, rooms,
+            floors, and services. Answers can show the location details and
+            facility images present in the data, with links to the official
+            NCERC 360° campus tour and Google Maps for directions to the
+            college. Users can rate answers, and feedback is stored in the
+            project’s SQLite database.
+        </p>
+        <p>
+            The model runs locally through Ollama and does not require a paid
+            AI service or an external AI API key. The assistant only provides
+            details supported by its campus data; verified building-to-building
+            routes, additional college timings, and policies must be added
+            from authoritative college information before the system can
+            answer those questions reliably.
+        </p>
+    </section>
+
+    <!-- CAMPUS TOUR -->
+    <section id="campus-tour" class="departments-section">
+        <h2>Explore the NCERC Campus</h2>
+        <p>Explore the campus using the official 360-degree tour.</p>
+        <p>
+            <a href="https://ncerc.ac.in/360/"
+               class="message-link"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open NCERC 360° Campus Tour ↗
+            </a>
+        </p>
+        <p>
+            <a href="https://www.google.com/maps/search/?api=1&amp;query=Nehru%20College%20of%20Engineering%20and%20Research%20Centre"
+               class="message-link"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open Campus Map ↗
+            </a>
+        </p>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="departments-section">
+        <h2>Contact</h2>
+        <p>
+            For official college enquiries, please contact the
+            college administration.
+        </p>
+        <p>
+            Visit the
+            <a href="https://ncerc.ac.in/"
+               target="_blank"
+               rel="noopener noreferrer">
+                official NCERC website
+            </a>
+            for college information.
+        </p>
+    </section>
+
+    <!-- COLLEGE DATA FOR JAVASCRIPT -->
+    {{ ncerc_data|json_script:"ncerc-data" }}
+
+    <!-- JAVASCRIPT -->
+    <script src="{% static 'helpdesk/script.js' %}?v=12"></script>
+</body>
+</html>
